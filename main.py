@@ -14,10 +14,10 @@ import package1.smabluetooth
 DEFAULT_CONFIG_FILE = os.path.expanduser("~/sma.json")
 
 # Connect and logon to inverter
-def connect_and_logon():
+def connect_and_logon(password, timeout):
     conn = package1.smabluetooth.Connection(inverter_bluetooth)
     conn.hello()
-    conn.logon()
+    conn.logon(password,timeout)    # pass password here 
     return conn
 
 # Send results to openHAB funcs
@@ -88,7 +88,7 @@ package1.progress.progress_function(inverter_bluetooth,1)
 #Open connectin to inverter get data and send to OpenHAB
 
 try:
-    sma = connect_and_logon()
+    sma = connect_and_logon(password= bytes( inverter_password, 'utf-8'), timeout=900)
     dtime, daily = sma.daily_yield()
     send_to_openHAB_day()
     print("\t\tDaily generation at %s: %d Wh" % (package1.datetimeutil.format_time(dtime), daily))

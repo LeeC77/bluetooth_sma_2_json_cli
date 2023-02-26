@@ -369,10 +369,8 @@ class Connection(base.InverterConnection):
 
         self.tx_ppp("ff:ff:ff:ff:ff:ff", SMA_PROTOCOL_ID, payload)
         return tag
-# original password was 0000 LC
-#    def tx_logon(self, password=b'0000', timeout=900):
 
-    def tx_logon(self, password=b'PHWS22sun', timeout=900):
+    def tx_logon(self, password=b'0000', timeout=900):
         if len(password) > 12:
             raise ValueError
         password += b'\x00' * (12 - len(password))
@@ -500,10 +498,8 @@ class Connection(base.InverterConnection):
                      tag, type_, subtype, arg1, arg2, payload)
         return self.wait_6560(tag)
     
-# original password was 0000    
-#    def logon(self, password=b'0000', timeout=900):
-
-    def logon(self, password=b'PHWS22sun', timeout=900):
+   
+    def logon(self, password=b'0000', timeout=900):
         tag = self.tx_logon(password, timeout)
         self.wait_6560(tag)
 
