@@ -1,0 +1,15 @@
+{
+    "openhab": {
+        "apikey": "oh.RestAccess.of5h9ZabNVJlsIzjxJnA1tT0kH2JF2uP1dqfSRzG5pwm7w8OyUAuRQdlj0xKV4tB8ST300euUkqWG8O6qnBMQ"
+    },
+    "system name": {
+        "name": "My Inverter Farm"
+    },
+    "inverter": {
+        "name": "Charlton PV plant 77 Fern",
+        "bluetooth": "00:80:25:2F:E8:19",
+        "serial": "2130330464",
+        "password": "PHWS22sun"
+     }
+    
+}
