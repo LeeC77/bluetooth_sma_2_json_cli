@@ -6,35 +6,33 @@ import socket
 # import this
 # BT addr for SMA inverter 00:80:25:2F:E8:19
 
-from package1 import void  # just checking  syntax
+
 import package1.progress
 import package1.smabluetooth
 
 
 DEFAULT_CONFIG_FILE = os.path.expanduser("~/sma.json")
 
+# Connect and logon to inverter
 def connect_and_logon():
     conn = package1.smabluetooth.Connection(inverter_bluetooth)
     conn.hello()
     conn.logon()
     return conn
 
-# oh.RestAccess.of5h9ZabNVJlsIzjxJnA1tT0kH2JF2uP1dqfSRzG5pwm7w8OyUAuRQdlj0xKV4tB8ST300euUkqWG8O6qnBMQ
+# Send results to openHAB funcs
 def send_to_openHAB_day():
     headers = {
         'accept': '*/*',
         'Content-Type': 'text/plain',
     }
-
     data = str(daily/1000)
-
     response = requests.post(
         'http://192.168.1.11:8080/rest/items/EnergyGeneratedToday',
         headers=headers,
         data=data,
-        auth=('oh.RestAccess.of5h9ZabNVJlsIzjxJnA1tT0kH2JF2uP1dqfSRzG5pwm7w8OyUAuRQdlj0xKV4tB8ST300euUkqWG8O6qnBMQ', ''),
+        auth=(openhab_key, ''),
     )
-        
     return 0
 
 def send_to_openHAB_total():
@@ -42,16 +40,13 @@ def send_to_openHAB_total():
         'accept': '*/*',
         'Content-Type': 'text/plain',
     }
-
     data = str(total/1000000)
-
     response = requests.post(
         'http://192.168.1.11:8080/rest/items/TotalEnergyGenerated',
         headers=headers,
         data=data,
-        auth=('oh.RestAccess.of5h9ZabNVJlsIzjxJnA1tT0kH2JF2uP1dqfSRzG5pwm7w8OyUAuRQdlj0xKV4tB8ST300euUkqWG8O6qnBMQ', ''),
+        auth=(openhab_key, ''),
     )
-        
     return 0
 
 #Get configuration from file
@@ -79,6 +74,9 @@ if "inverter" in alljson:
     inverter_bluetooth = invjson.get("bluetooth")
     inverter_serial = invjson.get("serial")
     inverter_password = invjson.get("password")
+if "openhab" in alljson:
+    ohjson = alljson["openhab"]
+    openhab_key = ohjson.get("apikey")
     print ("Inverter:")
     print ("\t\tName: " + inverter_name)
     print ("\t\tSerial: " + inverter_serial)
