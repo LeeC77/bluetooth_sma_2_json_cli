@@ -27,6 +27,13 @@ DEFAULT_CONFIG_FILE = os.path.expanduser("~/sma.json") # Windows
 #   DisablePlugins = pnat
 # Reboot the pi
 
+# To create executable
+# https://pyinstaller.org/en/stable/usage.html#options 
+# >> pip install pyinstaller
+# >> pyinstaller main.py -n openhabsma
+# to run it 
+# >> .\dist\openhabsma\openhabsma [-help]
+
 # Functions
 # Connect and logon to inverter
 def connect_and_logon(inverter_bluetooth, password, timeout):
@@ -150,13 +157,13 @@ if __name__ == "__main__":
 #Command line options        
     parser = argparse.ArgumentParser(description="SMA Inverter Bluetooth  to openHAB rest API",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-c", "--continuous",                           help="run continously checking every x second. x > 10. e.g. py openhabSMA - c 90", type=int, )
+    parser.add_argument("-c", "--continuous",                           help="run continously checking every x second. x > 10. e.g. py openhabsma.py - c 90", type=int, )
     parser.add_argument("-v", "--verbose",      action="store_true",    help="increase verbosity")
-    parser.add_argument("-f", "--file",                                 help="path to and .jsn configuration filename. e.g py openhabSMA -f ./test/sma.json", type=str)
+    parser.add_argument("-f", "--file",                                 help="path to and .jsn configuration filename. e.g py openhabsma.py -f ./test/sma.json", type=str)
     parser.add_argument("-o", "--openhab_off",  action="store_true",    help="turns off rest sends to openHAB")
     parser.add_argument("-s", "--silent",       action="store_true",    help="completely silent running. -s overrides -v ")
     parser.add_argument("--version",            action="store_true",    help="report version only, main() doesn't run")
-    parser.add_argument("-l", "--logfile",                              help="TO DO: log to file, for now use pipe. Windows example: py main.py -o > temp.txt")
+    parser.add_argument("-l", "--logfile",                              help="TO DO: log to file, for now use pipe. Windows example: py openhabsma.py -o > temp.txt")
     args = parser.parse_args()
     config = vars(args)
     if args.version : 
