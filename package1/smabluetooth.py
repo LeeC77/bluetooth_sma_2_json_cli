@@ -277,9 +277,9 @@ class Connection(base.InverterConnection):
             arg1 = bytes2int(payload[28:32])
             arg2 = bytes2int(payload[32:36])
             extra = payload[36:]
-            self.rx_6560(from2, to2, a2, b1, b2, c1, c2, tag,
-                         type_, subtype, arg1, arg2, extra,
-                         response, error, pktcount, first)
+            self.rx_6560(from2, to2, a2, b1, b2, c1, c2, tag, type_, subtype, arg1, arg2, extra, response, error, pktcount, first)
+#            print("RX:")
+#            print(payload)
 
     def rxfilter_6560(self, to2):
         return ((to2 == self.local_addr2) or
@@ -329,15 +329,19 @@ class Connection(base.InverterConnection):
             else:
                 rawpayload.append(b)
         rawpayload.append(0x7e)
-
+#        print(frame)
+#        print (rawpayload)
         self.tx_outer(self.local_addr, to_, OTYPE_PPP, rawpayload)
+############################ send ####################################
+## (self.local_addr2, self.BROADCAST2, 0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),0x200, 0x5400, 0x00262200, 0x002622ff)
+#  bytearray(),innerlen,a2,to2,              b1,b2,from2,      c1,c2,..error ..pktcount ..xtag, xtype ..subtype, arg1,       arg2,       extra
+#  bytearray(),09,      a0,ff,ff,ff,ff,ff,ff,00,00,00?,10,0fb9,00,00 ..error ..pktcount ..80,00,02,00 ..54,00,   00,26,22,00,00,26,22,ff,bytarray()
 
-    def tx_6560(self, from2, to2, a2, b1, b2, c1, c2, tag,
-                type_, subtype, arg1, arg2, extra=bytearray(),
-                response=False, error=0, pktcount=0, first=True):
+#################### Build level 2 packet ############################
+
+    def tx_6560(self, from2, to2, a2, b1, b2, c1, c2, tag, type_, subtype, arg1, arg2, extra=bytearray(),response=False, error=0, pktcount=0, first=True):
         if len(extra) % 4 != 0:
-            raise Error("Inner protocol payloads must" +
-                        " have multiple of 4 bytes length")
+            raise Error("Inner protocol payloads must" + " have multiple of 4 bytes length")
         innerlen = (len(extra) + INNER_HLEN) // 4
         payload = bytearray()
         payload.append(innerlen)
@@ -366,7 +370,7 @@ class Connection(base.InverterConnection):
         payload.extend(int2bytes32(arg1))
         payload.extend(int2bytes32(arg2))
         payload.extend(extra)
-
+#        print (payload)
         self.tx_ppp("ff:ff:ff:ff:ff:ff", SMA_PROTOCOL_ID, payload)
         return tag
 
@@ -378,19 +382,23 @@ class Connection(base.InverterConnection):
 
         extra = bytearray(b'\xaa\xaa\xbb\xbb\x00\x00\x00\x00')
         extra += bytearray(((c + 0x88) % 0xff) for c in password)
-        return self.tx_6560(self.local_addr2, self.BROADCAST2, 0xa0,
-                            0x00, 0x01, 0x00, 0x01, tag,
-                            0x040c, 0xfffd, 7, timeout, extra)
+        return self.tx_6560(self.local_addr2, self.BROADCAST2, 0xa0,0x00, 0x01, 0x00, 0x01, tag,0x040c, 0xfffd, 7, timeout, extra)
 
+######################## Daily Yield ############################
     def tx_gdy(self):
-        return self.tx_6560(self.local_addr2, self.BROADCAST2,
-                            0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),
-                            0x200, 0x5400, 0x00262200, 0x002622ff)
+        return self.tx_6560(self.local_addr2, self.BROADCAST2,0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),0x200, 0x5400, 0x00262200, 0x002622ff)
 
+####################### Total Yield #############################
     def tx_yield(self):
-        return self.tx_6560(self.local_addr2, self.BROADCAST2,
-                            0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),
-                            0x200, 0x5400, 0x00260100, 0x002601ff)
+        return self.tx_6560(self.local_addr2, self.BROADCAST2,0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),0x200, 0x5400, 0x00260100, 0x002601ff)
+    
+###################### LC spot AC power #########################                                                  
+    def tx_spotpower(self):
+        return self.tx_6560(self.local_addr2, self.BROADCAST2,0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),0x200, 0x5100, 0x00464000, 0x004642FF)
+    
+###################### LC spot Temp #############################     
+    def tx_temp(self):
+        return self.tx_6560(self.local_addr2, self.BROADCAST2,0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),0x200, 0x5200, 0x00237700, 0x002377FF)    
 
     def tx_set_time(self, ts, tzoffset):
         payload = bytearray()
@@ -407,14 +415,10 @@ class Connection(base.InverterConnection):
                             0x20a, 0xf000, 0x00236d00, 0x00236d00, payload)
 
     def tx_historic(self, fromtime, totime):
-        return self.tx_6560(self.local_addr2, self.BROADCAST2,
-                            0xe0, 0x00, 0x00, 0x00, 0x00, self.gettag(),
-                            0x200, 0x7000, fromtime, totime)
+        return self.tx_6560(self.local_addr2, self.BROADCAST2, 0xe0, 0x00, 0x00, 0x00, 0x00, self.gettag(), 0x200, 0x7000, fromtime, totime)
 
     def tx_historic_daily(self, fromtime, totime):
-        return self.tx_6560(self.local_addr2, self.BROADCAST2,
-                            0xe0, 0x00, 0x00, 0x00, 0x00, self.gettag(),
-                            0x200, 0x7020, fromtime, totime)
+        return self.tx_6560(self.local_addr2, self.BROADCAST2, 0xe0, 0x00, 0x00, 0x00, 0x00, self.gettag(), 0x200, 0x7020, fromtime, totime)
 
     def wait(self, class_, cond=None):
         self.waitvar = None
@@ -472,6 +476,8 @@ class Connection(base.InverterConnection):
         return tmplist[1:]
 
     # Operations
+    
+# Hello  message
 
     def hello(self):
         hellopkt = self.wait_outer(OTYPE_HELLO)
@@ -498,7 +504,8 @@ class Connection(base.InverterConnection):
                      tag, type_, subtype, arg1, arg2, payload)
         return self.wait_6560(tag)
     
-   
+# Logon message
+
     def logon(self, password=b'0000', timeout=900):
         tag = self.tx_logon(password, timeout)
         self.wait_6560(tag)
@@ -508,15 +515,47 @@ class Connection(base.InverterConnection):
         from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
         timestamp = bytes2int(extra[4:8])
         total = bytes2int(extra[8:12])
+#        print (extra[4:8])
+#        print (extra[8:12])
         return timestamp, total
-
+    
+# Daily Yield message
     def daily_yield(self):
         tag = self.tx_gdy()
         from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
         timestamp = bytes2int(extra[4:8])
         daily = bytes2int(extra[8:12])
+#        print (extra[4:8])
+#        print (extra[8:12])
         return timestamp, daily
 
+# LC Spot ac Power
+    def spot_power(self):
+        tag = self.tx_spotpower()
+        from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
+        timestamp = bytes2int(extra[4:8])
+        power = bytes2int(extra[16:18])
+#        power = bytes2int(extra[16:20])
+#        print (extra)
+#        print (extra[4:8])
+#        print (extra[16:20])
+        return timestamp, power
+    
+# LC Spot temperature 
+    def spot_temp(self):
+        tag = self.tx_temp()
+        from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
+        timestamp = bytes2int(extra[4:8])
+#        temp = bytes2int(extra[8:12])
+        temp = bytes2int(extra[16:18])
+#        print (extra)
+#        print (extra[4:8])
+#        print (extra[16:18])
+        return timestamp, temp
+
+
+   
+# Histroic message
     def historic(self, fromtime, totime):
         tag = self.tx_historic(fromtime, totime)
         data = self.wait_6560_multi(tag)
@@ -530,6 +569,7 @@ class Connection(base.InverterConnection):
                     points.append((timestamp, val))
         return points
 
+# Historic Daily
     def historic_daily(self, fromtime, totime):
         tag = self.tx_historic_daily(fromtime, totime)
         data = self.wait_6560_multi(tag)
@@ -611,7 +651,6 @@ if __name__ == '__main__':
     optlist, args = getopt.getopt(sys.argv[1:], 'b:')
 
     if not args:
-    #    print ("LC woz ere")
         print("Usage: %s -b <bdaddr> command args.." % sys.argv[0])
         sys.exit(1)
 

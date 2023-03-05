@@ -17,7 +17,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import dateutil.parser
+import dateutil.parser # pip install python-dateutil
 import dateutil.tz
 import datetime
 import time
