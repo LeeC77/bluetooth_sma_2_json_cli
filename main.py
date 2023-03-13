@@ -1,3 +1,22 @@
+#! /usr/bin/python3
+#
+# openhabsma - Support for Bluetooth enabled SMA inverters and send to openhab rest API
+# Copyright (C) 2023 Lee Charlton 
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 import os
 import sys
 import json
@@ -10,7 +29,7 @@ import argparse
 #import package1.progress
 import package1.smabluetooth
 
-VERSION_STRING = "SMA Bluetooth to openHAB rest API.\n\rVersion: 1.1 Date: 05 Mar 2023"
+VERSION_STRING = "SMA Bluetooth to openHAB rest API. Version: 1.1.1 Date: 12 Mar 2023"
 DEFAULT_CONFIG_FILE = os.path.expanduser("~/sma.json") # Windows
 #DEFAULT_CONFIG_FILE = os.path.expanduser("./sma.json") # Debian
 # Running on Debian
@@ -57,6 +76,9 @@ def send_to_openHAB(value,openhab_IPport,openhab_key, type):
     if (type == "spot temperature"):
         URL = URL + "SolarInverterSpotTemp"
         value = value / 100
+    if (type == "spot acvoltage"):
+        URL=URL +"SolarInverterSpotACVlotage"
+        value = value /100
     headers = {
         'accept': '*/*',
         'Content-Type': 'text/plain',
@@ -126,6 +148,7 @@ def main():
         ttime, total = sma.total_yield()
         wtime, watts = sma.spot_power() 
         tetime, temp = sma.spot_temp()
+        vtime, acvolts = sma.spot_voltage()
         
 # Report values verbose
         if verbose: 
@@ -133,6 +156,7 @@ def main():
             print("\t\tAt %s Total generation was:\t %d Wh" % (package1.datetimeutil.format_time(ttime), total))
             print("\t\tAt %s Spot Power is:\t\t %d W" % (package1.datetimeutil.format_time(wtime), watts))
             print("\t\tAt %s Spot Temperature is:\t %.2f °C" % (package1.datetimeutil.format_time(tetime), temp/100))
+            print("\t\tAt %s Spot AC Voltage is:\t %.2f V" % (package1.datetimeutil.format_time(vtime), acvolts/100))
           
 # Send values to openHAB REST interface        
         if not(args.openhab_off):
@@ -141,13 +165,14 @@ def main():
             send_to_openHAB(total,openhab_IPport, openhab_key, "total energy")
             send_to_openHAB(watts,openhab_IPport, openhab_key, "spot power")
             send_to_openHAB(temp,openhab_IPport, openhab_key, "spot temperature")
+            send_to_openHAB(acvolts,openhab_IPport, openhab_key, "spot acvoltage")
         else:
             if verbose: print("Skipping openHAB API export")
         
     except Exception as e:
         print ("Error contacting inverter: %s" % e, file =  sys.stderr)
         
-    if ((not(verbose)) & (not(args.silent))): print ("Done: \t%s, %dWh, %dMWh, %dW, %.2f°C," %(package1.datetimeutil.format_time(dtime),daily,total/1000000,watts,temp/100))
+    if ((not(verbose)) & (not(args.silent))): print ("Done: \t%s, %dWh, %dMWh, %dW, %.2fV, %.2f°C," %(package1.datetimeutil.format_time(dtime),daily,total/1000000,watts,acvolts/100,temp/100))
     
 starttime = time.time()
 go_interval = 30
@@ -155,7 +180,7 @@ go_interval = 30
 if __name__ == "__main__":
         
 #Command line options        
-    parser = argparse.ArgumentParser(description="SMA Inverter Bluetooth  to openHAB rest API",
+    parser = argparse.ArgumentParser(description=VERSION_STRING,
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-c", "--continuous",                           help="run continously checking every x second. x > 10. e.g. py openhabsma.py - c 90", type=int, )
     parser.add_argument("-v", "--verbose",      action="store_true",    help="increase verbosity")

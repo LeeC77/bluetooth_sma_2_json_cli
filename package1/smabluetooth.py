@@ -147,7 +147,6 @@ def crc16(iv, data):
 
 
 class Connection(base.InverterConnection):
-#class Connection(InverterConnection): # LC added
     MAXBUFFER = 512
     BROADCAST = "ff:ff:ff:ff:ff:ff"
     BROADCAST2 = bytearray(b'\xff\xff\xff\xff\xff\xff')
@@ -400,6 +399,10 @@ class Connection(base.InverterConnection):
     def tx_temp(self):
         return self.tx_6560(self.local_addr2, self.BROADCAST2,0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),0x200, 0x5200, 0x00237700, 0x002377FF)    
 
+###################### LC spot Voltage ##########################  
+    def tx_acvoltage(self):
+        return self.tx_6560(self.local_addr2, self.BROADCAST2,0xa0, 0x00, 0x00, 0x00, 0x00, self.gettag(),0x200, 0x5100, 0x00464800, 0x004655FF)
+
     def tx_set_time(self, ts, tzoffset):
         payload = bytearray()
         payload.extend(int2bytes32(0x00236d00))
@@ -515,8 +518,6 @@ class Connection(base.InverterConnection):
         from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
         timestamp = bytes2int(extra[4:8])
         total = bytes2int(extra[8:12])
-#        print (extra[4:8])
-#        print (extra[8:12])
         return timestamp, total
     
 # Daily Yield message
@@ -525,8 +526,6 @@ class Connection(base.InverterConnection):
         from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
         timestamp = bytes2int(extra[4:8])
         daily = bytes2int(extra[8:12])
-#        print (extra[4:8])
-#        print (extra[8:12])
         return timestamp, daily
 
 # LC Spot ac Power
@@ -535,26 +534,24 @@ class Connection(base.InverterConnection):
         from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
         timestamp = bytes2int(extra[4:8])
         power = bytes2int(extra[16:18])
-#        power = bytes2int(extra[16:20])
-#        print (extra)
-#        print (extra[4:8])
-#        print (extra[16:20])
         return timestamp, power
     
-# LC Spot temperature 
+# LC Spot Temperature 
     def spot_temp(self):
         tag = self.tx_temp()
         from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
         timestamp = bytes2int(extra[4:8])
-#        temp = bytes2int(extra[8:12])
         temp = bytes2int(extra[16:18])
-#        print (extra)
-#        print (extra[4:8])
-#        print (extra[16:18])
         return timestamp, temp
 
+# LC Spot Voltage 
+    def spot_voltage(self):
+        tag = self.tx_acvoltage()
+        from2, type_, subtype, arg1, arg2, extra = self.wait_6560(tag)
+        timestamp = bytes2int(extra[4:8])
+        acvolts = bytes2int(extra[8:10])
+        return timestamp, acvolts
 
-   
 # Histroic message
     def historic(self, fromtime, totime):
         tag = self.tx_historic(fromtime, totime)
@@ -586,10 +583,8 @@ class Connection(base.InverterConnection):
     def set_time(self, newtime, tzoffset):
         self.tx_set_time(newtime, tzoffset)
 
-
 def ptime(str):
     return int(time.mktime(time.strptime(str, "%Y-%m-%d")))
-
 
 def cmd_total(sma, args):
     if len(args) != 1:
@@ -599,7 +594,6 @@ def cmd_total(sma, args):
     timestamp, total = sma.total_yield()
     print("%s: Total generation to-date %d Wh"
           % (format_time(timestamp), total))
-
 
 def cmd_daily(sma, args):
     if len(args) != 1:
