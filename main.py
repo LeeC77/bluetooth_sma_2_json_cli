@@ -77,7 +77,7 @@ def send_to_openHAB(value,openhab_IPport,openhab_key, type):
         URL = URL + "SolarInverterSpotTemp"
         value = value / 100
     if (type == "spot acvoltage"):
-        URL=URL +"SolarInverterSpotACVlotage"
+        URL=URL +"SolarInverterSpotACVoltage"
         value = value /100
     headers = {
         'accept': '*/*',
