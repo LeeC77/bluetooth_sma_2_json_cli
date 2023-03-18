@@ -37,6 +37,18 @@ class InverterConnection(object, metaclass=abc.ABCMeta):
         raise NotImplementedError()
 
     @abc.abstractmethod
+    def spot_power(self):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def spot_temp(self):
+        raise NotImplementedError()
+        
+    @abc.abstractmethod
+    def spot_voltage(self):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
     def historic(self, fromtime, totime):
         raise NotImplementedError()
 

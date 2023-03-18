@@ -1,7 +1,7 @@
 #! /usr/bin/python3
-#
-# smadata2.inverter.smabluetooth - Support for Bluetooth enabled SMA inverters
-# Copyright (C) 2014 David Gibson <david@gibson.dropbear.id.au>
+
+# package1.smabluetooth - Support for Bluetooth enabled SMA inverters and send to openhab rest API
+# Copyright (C) 2023 Lee Charlton 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -484,27 +484,22 @@ class Connection(base.InverterConnection):
 
     def hello(self):
         hellopkt = self.wait_outer(OTYPE_HELLO)
-        if hellopkt != bytearray(b'\x00\x04\x70\x00\x01\x00\x00\x00' +
-                                 b'\x00\x01\x00\x00\x00'):
+        if hellopkt != bytearray(b'\x00\x04\x70\x00\x01\x00\x00\x00' + b'\x00\x01\x00\x00\x00'):
             raise Error("Unexpected HELLO %r" % hellopkt)
-        self.tx_outer("00:00:00:00:00:00", self.remote_addr,
-                      OTYPE_HELLO, hellopkt)
+        self.tx_outer("00:00:00:00:00:00", self.remote_addr, OTYPE_HELLO, hellopkt)
         self.wait_outer(0x05)
 
     def getvar(self, varid):
-        self.tx_outer("00:00:00:00:00:00", self.remote_addr, OTYPE_GETVAR,
-                      int2bytes16(varid))
+        self.tx_outer("00:00:00:00:00:00", self.remote_addr, OTYPE_GETVAR, int2bytes16(varid))
         val = self.wait_outer(OTYPE_VARVAL, int2bytes16(varid))
         return val[2:]
 
     def getsignal(self):
         val = self.getvar(OVAR_SIGNAL)
-        return val[2] / 0xff
+        return (val[2] / 0xff)*100
 
-    def do_6560(self, a2, b1, b2, c1, c2, tag, type_, subtype, arg1, arg2,
-                payload=bytearray()):
-        self.tx_6560(self.local_addr2, self.BROADCAST2, a2, b1, b2, c1, c2,
-                     tag, type_, subtype, arg1, arg2, payload)
+    def do_6560(self, a2, b1, b2, c1, c2, tag, type_, subtype, arg1, arg2, payload=bytearray()):
+        self.tx_6560(self.local_addr2, self.BROADCAST2, a2, b1, b2, c1, c2, tag, type_, subtype, arg1, arg2, payload)
         return self.wait_6560(tag)
     
 # Logon message

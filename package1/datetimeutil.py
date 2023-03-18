@@ -1,6 +1,6 @@
 #! /usr/bin/python3
 #
-# smadata2.datetimeutil - Date and time helper functions
+# package1.datetimeutil - Date and time helper functions
 # Copyright (C) 2014, 2015 David Gibson <david@gibson.dropbear.id.au>
 #
 # This program is free software; you can redistribute it and/or modify

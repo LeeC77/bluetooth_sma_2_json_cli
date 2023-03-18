@@ -32,32 +32,18 @@ import package1.smabluetooth
 VERSION_STRING = "SMA Bluetooth to openHAB rest API. Version: 1.1.1 Date: 12 Mar 2023"
 DEFAULT_CONFIG_FILE = os.path.expanduser("~/sma.json") # Windows
 #DEFAULT_CONFIG_FILE = os.path.expanduser("./sma.json") # Debian
-# Running on Debian
-#Debian RFCOMM Bluetooth fix Protocol not supported
-#	https://github.com/mathoudebine/homeassistant-timebox-mini/issues/5
-#https://support.plugable.com/t/bluetooth-home-automation-switch-btaps1-raspberry-pi-error/8554
-#		https://forums.raspberrypi.com//viewtopic.php?p=521067#p521067
-# >> sudo apt-get update
-# >> sudo apt-get install bluez minicom bluez-utils
-# If bluez-utils doesn’t exist then make sure bluz and minicom are installed
-# Bluez PNAT is not needed and breaks things, so edit main.conf:
-# >> sudo nano /etc/bluetooth/main.conf
-# In general add the following:
-#   DisablePlugins = pnat
-# Reboot the pi
+VALIDACVOLTS = 300.0  # Validates the inverter a.c. voltage
+VALIDTEMPERATURE = 0.0 # Validates  the inverter temperature
 
-# To create executable
-# https://pyinstaller.org/en/stable/usage.html#options 
-# >> pip install pyinstaller
-# >> pyinstaller main.py -n openhabsma
-# to run it 
-# >> .\dist\openhabsma\openhabsma [-help]
 
 # Functions
 # Connect and logon to inverter
 def connect_and_logon(inverter_bluetooth, password, timeout):
     conn = package1.smabluetooth.Connection(inverter_bluetooth)
     conn.hello()
+    if verbose:
+        print ("Trying BT address: " + inverter_bluetooth, end="" )
+        print (" signal quality: %.2f %%" % conn.getsignal())
     conn.logon(password,timeout)    # pass password here 
     return conn
 
@@ -93,6 +79,13 @@ def send_to_openHAB(value,openhab_IPport,openhab_key, type):
     )
     return 0
 
+def valdate_inverter_value (value_type, value):
+    
+        if (value_type== "acvolts"):
+            if (value > VALIDACVOLTS): return False            # Inverter asleep
+        if (value_type == "temperature"):
+            if (value == VALIDTEMPERATURE): return False                    # Inverter asleep
+        return True
 
 def main():
 
@@ -112,7 +105,6 @@ def main():
         
     alljson = json.load(f)
     # fetch parameters form Json
-
     #System: name,Inverter: name, bluetooth,serial, password 
     if "system name" in alljson:
         sysjson = alljson["system name"]
@@ -135,12 +127,8 @@ def main():
             print ("\t\tBluetooth address: " + inverter_bluetooth)
             print ("\t\tOpenHab URL: " + openhab_IPport)
             print ("\t\tKeys and Passwords not shown.")
-        
-        
-    if verbose: print("Trying BT address: " + inverter_bluetooth )
 
 # Open connectin to inverter get data and send to OpenHAB
-
     try:
         sma = connect_and_logon(inverter_bluetooth, password= bytes(inverter_password, 'utf-8'), timeout=900)
         
@@ -150,6 +138,7 @@ def main():
         tetime, temp = sma.spot_temp()
         vtime, acvolts = sma.spot_voltage()
         
+        
 # Report values verbose
         if verbose: 
             print("\t\tAt %s Daily generation was:\t %d Wh" % (package1.datetimeutil.format_time(dtime), daily))
@@ -157,7 +146,10 @@ def main():
             print("\t\tAt %s Spot Power is:\t\t %d W" % (package1.datetimeutil.format_time(wtime), watts))
             print("\t\tAt %s Spot Temperature is:\t %.2f °C" % (package1.datetimeutil.format_time(tetime), temp/100))
             print("\t\tAt %s Spot AC Voltage is:\t %.2f V" % (package1.datetimeutil.format_time(vtime), acvolts/100))
-          
+# Check values in valid range
+        if (not(valdate_inverter_value("acvolts", acvolts/100)) or not(valdate_inverter_value("temperature", temp/100))):
+            raise Exception("The inverter retuned an invalid parameter, its probably asleep.")
+
 # Send values to openHAB REST interface        
         if not(args.openhab_off):
             if verbose: print("exporting to openHAB API")
@@ -172,6 +164,7 @@ def main():
     except Exception as e:
         print ("Error contacting inverter: %s" % e, file =  sys.stderr)
         
+        
     if ((not(verbose)) & (not(args.silent))): print ("Done: \t%s, %dWh, %dMWh, %dW, %.2fV, %.2f°C," %(package1.datetimeutil.format_time(dtime),daily,total/1000000,watts,acvolts/100,temp/100))
     
 starttime = time.time()
@@ -180,8 +173,7 @@ go_interval = 30
 if __name__ == "__main__":
         
 #Command line options        
-    parser = argparse.ArgumentParser(description=VERSION_STRING,
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(description=VERSION_STRING,formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-c", "--continuous",                           help="run continously checking every x second. x > 10. e.g. py openhabsma.py - c 90", type=int, )
     parser.add_argument("-v", "--verbose",      action="store_true",    help="increase verbosity")
     parser.add_argument("-f", "--file",                                 help="path to and .jsn configuration filename. e.g py openhabsma.py -f ./test/sma.json", type=str)
