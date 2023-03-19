@@ -1,0 +1,11 @@
+Private/sma.json
+Private/Resources.docx
+Private/examples.xlsx
+task.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/settings.json
+package1/__pycache__/
+package1/__pycache__/datetimeutil.cpython-311.pyc
+package1/__pycache__/base.cpython-311.pyc
+

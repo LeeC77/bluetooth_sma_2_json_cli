@@ -26,10 +26,9 @@ import argparse
 
 
 ##### import my packages
-#import package1.progress
 import package1.smabluetooth
 
-VERSION_STRING = "SMA Bluetooth to openHAB rest API. Version: 1.1.1 Date: 12 Mar 2023"
+VERSION_STRING = "SMA Bluetooth to openHAB rest API. Version: 1.1.2 Date: 19 Mar 2023"
 DEFAULT_CONFIG_FILE = os.path.expanduser("~/sma.json") # Windows
 #DEFAULT_CONFIG_FILE = os.path.expanduser("./sma.json") # Debian
 VALIDACVOLTS = 300.0  # Validates the inverter a.c. voltage
@@ -96,8 +95,7 @@ def main():
         if verbose: print("overriding default config file location")
     else:configfile=None
 
-    if configfile is None:
-                configfile = DEFAULT_CONFIG_FILE
+    if configfile is None: configfile = DEFAULT_CONFIG_FILE
     if isinstance(configfile, str):
         f = open(configfile, "r")
     else:
@@ -148,7 +146,7 @@ def main():
             print("\t\tAt %s Spot AC Voltage is:\t %.2f V" % (package1.datetimeutil.format_time(vtime), acvolts/100))
 # Check values in valid range
         if (not(valdate_inverter_value("acvolts", acvolts/100)) or not(valdate_inverter_value("temperature", temp/100))):
-            raise Exception("The inverter retuned an invalid parameter, its probably asleep.")
+            raise Exception("The inverter returned an invalid parameter, its probably asleep.")
 
 # Send values to openHAB REST interface        
         if not(args.openhab_off):
@@ -174,7 +172,7 @@ if __name__ == "__main__":
         
 #Command line options        
     parser = argparse.ArgumentParser(description=VERSION_STRING,formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-c", "--continuous",                           help="run continously checking every x second. x > 10. e.g. py openhabsma.py - c 90", type=int, )
+    parser.add_argument("-c", "--continuous",                           help="run continuously checking every x second. x > 10. e.g. py openhabsma.py - c 90", type=int, )
     parser.add_argument("-v", "--verbose",      action="store_true",    help="increase verbosity")
     parser.add_argument("-f", "--file",                                 help="path to and .jsn configuration filename. e.g py openhabsma.py -f ./test/sma.json", type=str)
     parser.add_argument("-o", "--openhab_off",  action="store_true",    help="turns off rest sends to openHAB")
@@ -192,7 +190,7 @@ if __name__ == "__main__":
 # Report running mode
     if verbose: print(config)    
     else: 
-        if not(args.silent):print("Runnig quietly")
+        if not(args.silent):print("Running quietly")
 # Run once or continuously
     if args.continuous :
         if args.continuous >= 10 :
