@@ -1,4 +1,7 @@
 # SMA Inverter (BlueTooth) to openHAB (REST)
+
+> If you use this project please consider donating to my favorite charity: <https://www.nowdonate.com/checkout/pv0j03m4s1o1x60o6bh2>
+
 This project collects data from an SMA Solar Inverter using BlueTooth and optionally publishes the values to the openHAB REST interface.
 In my case I have a SMA Sunny Boy 3600TL Inverter and my openHAB installed on an RasPi 4 using openhabian. My  inverter has been updated to FW3.25.05_SB3600TL-20 but there is no reason to suspect that this will not work with other SMA invertors or FWs.
 
