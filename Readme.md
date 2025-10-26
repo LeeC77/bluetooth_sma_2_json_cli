@@ -109,6 +109,46 @@ You don't have to use your Windows installed VSCode to build and debug on Debian
 <https://code.visualstudio.com/docs/remote/ssh-tutorial>   
 <https://learn.microsoft.com/en-gb/windows-server/administration/openssh/openssh_install_firstuse?tabs=gui>
 
+
+### Python Virtual Environments
+
+As python is used in the base builds for modern operating systems, installing modules directly can cause issues. To avoid this create a virtual environment as part of your development environment.
+
+For VSCode in Windows:
+
+* First, set the Python setting that controls global module installation to false in settings.json
+```
+python.globalModuleInstallation": false
+````
+*  Create a Python virtual environment using the Python.
+
+    Note If Windows Defender is blocking the creation of the virtual environment, you'll need to temporarily disable the controlled folder access or add an exception. Here's how to resolve this:
+
+    Open Windows Security (Windows Defender)
+    Click on "Virus & threat protection"
+    Scroll down to "Controlled folder access"
+    Click "Manage Controlled folder access"
+    Either:
+    Temporarily turn off "Controlled folder access" OR
+    Click "Allow an app through Controlled folder access"
+    Click "Add an allowed app"
+    Browse to and select:
+    ```C:\Users\[YourUsername]\AppData\Local\Programs\Python\Python[xxx]\python.exe```
+
+* In VsCode : Create Environment command in the command pallet CTRL+SHIFT+P.
+
+    Select "Venv"
+
+    Select Python version 
+
+    Set the environment name e.g. ".python_virtual_env"
+
+    Skip the module install for now
+
+* Once the virtual environment is created, use the Python: Select Interpreter command in the command pallet CTRL+SHIFT+P and select the interpreter from the newly created virtual environment.
+* The command prompt should be preceded with green text  sating the name of the virtual environment.
+* With this virtual environment selected, when you install packages using pip, they will only be installed in this environment.
+
 ## Python Packages
 
 Your going to need the following Python packages 
