@@ -373,6 +373,7 @@ class Connection(base.InverterConnection):
         self.tx_ppp("ff:ff:ff:ff:ff:ff", SMA_PROTOCOL_ID, payload)
         return tag
 
+######################## Encodes password  ############################
     def tx_logon(self, password=b'0000', timeout=900):
         if len(password) > 12:
             raise ValueError

@@ -145,7 +145,7 @@ python.globalModuleInstallation": false
 
     Skip the module install for now
 
-* Once the virtual environment is created, use the Python: Select Interpreter command in the command pallet CTRL+SHIFT+P and select the interpreter from the newly created virtual environment.
+* Once the virtual environment is created, use the Python: Select Interpreter command in the command pallet CTRL+SHIFT+P and 'Select Interpreter' for the newly created virtual environment.
 * The command prompt should be preceded with green text  sating the name of the virtual environment.
 * With this virtual environment selected, when you install packages using pip, they will only be installed in this environment.
 
