@@ -124,28 +124,35 @@ python.globalModuleInstallation": false
 
     Note If Windows Defender is blocking the creation of the virtual environment, you'll need to temporarily disable the controlled folder access or add an exception. Here's how to resolve this:
 
-    Open Windows Security (Windows Defender)
-    Click on "Virus & threat protection"
-    Scroll down to "Controlled folder access"
-    Click "Manage Controlled folder access"
+    1. Open Windows Security (Windows Defender)
+    1. Click on "Virus & threat protection"
+    1. Scroll down to "Controlled folder access"
+    1. Click "Manage Controlled folder access"
+
     Either:
-    Temporarily turn off "Controlled folder access" OR
-    Click "Allow an app through Controlled folder access"
-    Click "Add an allowed app"
-    Browse to and select:
+    1. Temporarily turn off "Controlled folder access"
+    
+    OR
+    1. Click "Allow an app through Controlled folder access"
+    1. Click "Add an allowed app"
+    1. Browse to and select:
     ```C:\Users\[YourUsername]\AppData\Local\Programs\Python\Python[xxx]\python.exe```
 
-* In VsCode : Create Environment command in the command pallet CTRL+SHIFT+P.
+* In VsCode : Create Environment command in the command pallet.
 
-    Select "Venv"
+    1. CTRL+SHIFT+P  and select 'Python: Create Environment'
 
-    Select Python version 
+    1. Select "Venv"
 
-    Set the environment name e.g. ".python_virtual_env"
+    1. Select Python version 
 
-    Skip the module install for now
+    1. Set the environment name e.g. ".python_virtual_env"
 
-* Once the virtual environment is created, use the Python: Select Interpreter command in the command pallet CTRL+SHIFT+P and 'Select Interpreter' for the newly created virtual environment.
+    1. Skip the module install for now
+
+* Once the virtual environment is created, use the Python: Select Interpreter command in the command pallet.
+    
+    1. CTRL+SHIFT+P and 'Select Interpreter' for the newly created virtual environment.
 * The command prompt should be preceded with green text  sating the name of the virtual environment.
 * With this virtual environment selected, when you install packages using pip, they will only be installed in this environment.
 
