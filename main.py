@@ -100,7 +100,7 @@ def main():
     if (code == 0):
         # Json {"code" : 0, "message" : "xyz", "data" : {"daily" : xxx, "total" : xxx, "watts" : xxx, "temperature" : xx.x, "acvolts" : xx.x, "time" : "xxx"}}
         if (not args.readable): # json print (default)
-            print("{\"code\" : %d, \"message\" : \"%s\", \"DATA\" : {\"daily\" : %d, \"total\" : %d, \"watts\" : %d, \"temperature\" : %.2f, \"acvolts\" : %.2f,  \"time\" : \"%s\"}}" % (code, message, daily, total, watts, temp/100, acvolts/100, (package1.datetimeutil.format_time(dtime))))
+            print("{\"code\" : %d, \"message\" : \"%s\", \"data\" : {\"daily\" : %d, \"total\" : %d, \"watts\" : %d, \"temperature\" : %.2f, \"acvolts\" : %.2f,  \"time\" : \"%s\"}}" % (code, message, daily, total, watts, temp/100, acvolts/100, (package1.datetimeutil.format_time(dtime))))
 
         if (args.readable):    # readable print  
             print("Status: %s" % message)  
