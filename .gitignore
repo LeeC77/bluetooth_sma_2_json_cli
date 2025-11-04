@@ -4,6 +4,7 @@ task.json
 .vscode/launch.json
 .vscode/tasks.json
 .vscode/settings.json
+.python_virtual_env/
 package1/__pycache__/
 package1/__pycache__/datetimeutil.cpython-311.pyc
 package1/__pycache__/base.cpython-311.pyc
