@@ -10,4 +10,5 @@ package1/__pycache__/base.cpython-311.pyc
 build/
 dist/
 sma2json.exe.spec
+input_data.txt
 

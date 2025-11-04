@@ -17,9 +17,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+#import debugpy
+#debugpy.listen(21000) # Use an available port
+#print("Waiting for debugger to attach...")
+#debugpy.wait_for_client() # Pause execution until a debugger is attached
+#print("Debugger is attached")
 # imports
 import argparse
 import re
+import threading
+import queue
+import sys
+
 # import my packages
 import package1.smabluetooth
 
@@ -45,14 +54,35 @@ def validate_inverter_value (value_type, value):
             if (value == VALIDTEMPERATURE): return False       # Inverter asleep
         return True
 
+# for better security password can be read from stdin
+def read_from_stdin(q):
+    
+    for line in iter(sys.stdin.readline, ''):
+        q.put(line)
+
 # MAIN
 def main():
 # Initialize
     message = "Success"
     code = 0
+    password = ""
+    TIMEOUT=10 # Timeout for stdin input
+
+# Non blocking read from stdin    
+    if args.stdin:
+        # print("Please enter password and press Enter ")
+        try:
+            user_input = input_queue.get(timeout=TIMEOUT) 
+            user_input = user_input.strip()
+            # print("PW: %s" % user_input)
+            password = user_input
+        except queue.Empty:
+            password =""
+    elif args.password is not None:
+        password = args.password
 
 # Check Args
-    if (args.btaddr is None) or (args.password is None):
+    if (args.btaddr is None) or (password == ""):
         code = 2
         message = "Bluetooth address and password are required"
     elif (len(args.btaddr) != 17):
@@ -80,7 +110,7 @@ def main():
             message = "Test mode values used"
         else:
             try:
-                sma = connect_and_logon(args.btaddr, password= bytes(args.password, 'utf-8'), timeout=900)
+                sma = connect_and_logon(args.btaddr, password= bytes(password, 'utf-8'), timeout=900)
                 dtime, daily = sma.daily_yield()
                 ttime, total = sma.total_yield()
                 wtime, watts = sma.spot_power() 
@@ -119,18 +149,23 @@ def main():
 
 if __name__ == "__main__":
         
-#Command line options        
+#Command line options        S
     parser = argparse.ArgumentParser(description=VERSION_STRING,formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-b", "--btaddr",                         help="the bluetooth address of the inverter e.g. 00:80:25:XX:XX:XX", type=str)
     parser.add_argument("-p", "--password",                       help="password for the inverter", type=str)
     parser.add_argument("-r", "--readable", action="store_true",  help=" off (default) output results in json format, on output in human readable format")
     parser.add_argument("-t", "--test",     action="store_true",  help=" test mode - use hardcoded values rather than connecting to inverter")
     parser.add_argument("-v", "--version",  action="store_true",  help="report version only, main() doesn't run")
+    parser.add_argument("-s", "--stdin",    action="store_true",  help="read password from stdin for better security overrides -p")
     args = parser.parse_args()
     config = vars(args)
     if args.version : 
         print (VERSION_STRING)
         exit()
+    # Start thread to read from stdin
+    input_queue = queue.Queue()
+    input_thread = threading.Thread(target=read_from_stdin, args=(input_queue,), daemon=True)
+    input_thread.start()
     main()
 
     
